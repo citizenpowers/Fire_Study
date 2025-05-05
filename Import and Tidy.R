@@ -1,4 +1,4 @@
-#Import and tidy fire data
+#Import and tidy fire water quality data
 
 
 
@@ -33,9 +33,8 @@ mutate(Block=case_when(STATION %in% c("Untreated_A","Burn_A","Herbicide_A","Burn
                        STATION %in% c("Untreated_C","Burn_C","Herbicide_C","Burn_Herb_C")~"C",
                        TRUE ~ NA))  %>%
 mutate(FIRST_TRIGGER_DATE=mdy_hms(FIRST_TRIGGER_DATE))
- test<- format("03/22/2025 03:00:00 AM")
 
-
+write_csv(LIMSP_Provisional_Data_Tidy ,"./Data/Water Quality Data/LIMSP_Provisional_Data_Tidy.csv")
 
 # OPO4 Figures -----------------------------------------------------------------
 

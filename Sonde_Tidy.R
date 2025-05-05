@@ -86,10 +86,10 @@ Deployment_1 <- bind_rows(EXOdata_BURN_111924_010625_Tidy,EXOdata_BurnHerbicide_
 filter(Date_time<"2024-12-17 09:00:00",Date_time>"2024-11-19 13:00:00") #deployment period
 
 #Join Data Deployment 2
-Deployemnt_2 <- bind_rows(EXOdata_Herbicide_011525_042825_Tidy,EXOdata_BURN_011525_042825_Tidy,EXOdata_Untreated_011525_042825_Tidy,EXOdata_BurnHerbicide_011525_042825_Tidy) %>%
+Deployment_2 <- bind_rows(EXOdata_Herbicide_011525_042825_Tidy,EXOdata_BURN_011525_042825_Tidy,EXOdata_Untreated_011525_042825_Tidy,EXOdata_BurnHerbicide_011525_042825_Tidy) %>%
 filter(Date_time<"2025-04-21 09:00:00",Date_time>"2025-01-15 12:30:00") #deployment period
 
-Sonde_Wide_Tidy <- bind_rows(Deployment_1,Deployemnt_2)
+Sonde_Wide_Tidy <- bind_rows(Deployment_1,Deployment_2)
 
 #Convert to long format
 Sonde_Long_Tidy <- Sonde_Wide_Tidy %>%
@@ -98,7 +98,8 @@ pivot_longer(names_to="Parameter",values_to = "Value",2:19)
 #Save Data
 write_csv(Sonde_Long_Tidy,"./Data/Sonde/Sonde_Long_Tidy.csv")
 write_csv(Sonde_Wide_Tidy,"./Data/Sonde/Sonde_Wide_Tidy.csv")
-# figures -----------------------------------------------------------------
+
+# EDA figures -----------------------------------------------------------------
 
 #all parameters
 ggplot(Sonde_Long_Tidy ,aes(Date_time ,Value,color=`Site Name`,fill=`Site Name`))+
