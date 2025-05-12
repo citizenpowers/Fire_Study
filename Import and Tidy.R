@@ -39,23 +39,17 @@ mutate(`Date_Treatment`=paste(`Burn Day`," ",Treatment))
 
 #Calculate DOP 
 DOP <- LIMSP_Provisional_Data_Tidy1 %>%
-filter(TEST_NAME %in% c("TDPO4","SRP"),COLLECT_METHOD=="GP")  %>%
+filter(TEST_NAME %in% c("TDPO4","SRP","TPO4"),COLLECT_METHOD=="GP")  %>%
 pivot_wider(names_from = "TEST_NAME",values_from = "VALUE")  %>%
 filter(!is.na(TDPO4)) %>%  
-mutate(DOP=TDPO4-SRP) %>%
-pivot_longer(names_to = "TEST_NAME",values_to = "VALUE",18) %>%
-select(-SRP,-TDPO4)  
+mutate(DOP=TDPO4-SRP,PP=TPO4-TDPO4) %>%
+pivot_longer(names_to = "TEST_NAME",values_to = "VALUE",16:20) %>%
+filter(TEST_NAME %in% c("PP","DOP"))  
 
 #Add DOP to dataset 
 LIMSP_Provisional_Data_Tidy <- bind_rows(LIMSP_Provisional_Data_Tidy1,DOP) 
 
-#Add statistical significance to dataset 
-LIMSP_Provisional_Data_Tidy_letters <- LIMSP_Provisional_Data_Tidy %>%
-left_join(LIMSP_Provisional_Data_letters,by=c("Burn Day", "TEST_NAME","Treatment")) %>%
-mutate(`Burn Day`=as.factor(`Burn Day`))
-
 write_csv(LIMSP_Provisional_Data_Tidy ,"./Data/Water Quality Data/LIMSP_Provisional_Data_Tidy.csv")
-write_csv(LIMSP_Provisional_Data_Tidy_letters ,"./Data/Water Quality Data/LIMSP_Provisional_Data_Tidy_letters.csv")
 
 
 # OPO4 Figures -----------------------------------------------------------------
