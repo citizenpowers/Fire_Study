@@ -52,11 +52,22 @@ LIMSP_Provisional_Data_Tidy <- bind_rows(LIMSP_Provisional_Data_Tidy1,DOP)
 write_csv(LIMSP_Provisional_Data_Tidy ,"./Data/Water Quality Data/LIMSP_Provisional_Data_Tidy.csv")
 
 
+
+
+# All parameters (histograms) ---------------------------------------------
+
+ggplot(filter(LIMSP_Provisional_Data_Tidy_letters_log ,COLLECT_METHOD=="GP",COLLECT_DATE>"2025-02-01 00:00:00",COLLECT_DATE<"2025-05-01 00:00:00",MATRIX=="SW"),aes(VALUE))+
+geom_histogram()+  facet_wrap(~TEST_NAME,scales="free")+
+theme_bw()+theme(legend.position="bottom")
+
+
+
+
 # OPO4 Figures -----------------------------------------------------------------
 
 #Grab samples OPO4 only Points
 
-ggplot(filter(LIMSP_Provisional_Data_Tidy,TEST_NAME=="OPO4",COLLECT_METHOD=="GP",COLLECT_DATE>"2025-04-09 00:00:00",MATRIX=="SW"),aes(as_datetime(COLLECT_DATE) ,VALUE,color=Treatment,fill=Treatment))+
+ggplot(filter(LIMSP_Provisional_Data_Tidy,TEST_NAME=="OPO4",COLLECT_METHOD=="GP",COLLECT_DATE>"2025-04-09 00:00:00",MATRIX=="SW"),aes((COLLECT_DATE) ,VALUE,color=Treatment,fill=Treatment))+
 scale_x_datetime(date_labels = "%b %d",date_breaks = "1 day")+
 scale_fill_manual(values = c("#e31a1c","#ff7f00","#cab2d6","#33a02c"))+
 geom_smooth( span = 1,se=T,alpha=.1)+
@@ -95,14 +106,13 @@ geom_text(aes(as.factor(`Burn Day`),max(VALUE)*1100,label=Letter,group=Treatment
 geom_boxplot(aes(fill=`Treatment`))+theme_bw()
 
 
-
 # TP figures --------------------------------------------------------------
 
 ggplot(filter(LIMSP_Provisional_Data_Tidy,TEST_NAME=="TPO4",COLLECT_METHOD=="GP",COLLECT_DATE>"2025-04-09 00:00:00",MATRIX=="SW"),aes(as_datetime(COLLECT_DATE) ,VALUE,color=Treatment,fill=Treatment))+
 scale_x_datetime(date_labels = "%b %d",date_breaks = "1 day")+
 scale_fill_manual(values = c("#e31a1c","#ff7f00","#cab2d6","#33a02c"))+
 geom_smooth( span = 5,se=T,alpha=.1)+
-geom_rect(inherit.aes=F,aes(xmin =stage("2025-04-10", after_scale = xmin-0.5) ,xmax=stage("2025-04-21", after_scale = xmax+0.5),,ymin=-Inf,ymax=Inf),fill="#fb9a99")+  
+#geom_rect(inherit.aes=F,aes(xmin =stage("2025-04-10", after_scale = xmin-0.5) ,xmax=stage("2025-04-21", after_scale = xmax+0.5),,ymin=-Inf,ymax=Inf),fill="#fb9a99")+  
 xlab("Month")+
 ylab(expression(TPO4~(mg/L)))+labs(title="TPO4 over time")+
 geom_point(shape=21,size=2,color="black")+theme_bw()
@@ -110,7 +120,7 @@ geom_point(shape=21,size=2,color="black")+theme_bw()
 ggsave(plot = last_plot(),filename="./Figures/Seasonal Flow.jpeg",width =16, height =9, units = "in")
 
 #Grab samples TPO4 only column
-ggplot(filter(LIMSP_Provisional_Data_Tidy,TEST_NAME=="TPO4",COLLECT_METHOD=="GP",COLLECT_DATE>"2025-04-09 00:00:00",MATRIX=="SW"),aes(as.Date(COLLECT_DATE) ,VALUE,color=Treatment,fill=Treatment))+
+ggplot(filter(LIMSP_Provisional_Data_Tidy,TEST_NAME=="TPO4",COLLECT_METHOD=="GP",COLLECT_DATE>"2025-04-09 00:00:00",MATRIX=="SW"),aes(as.Date(COLLECT_DATE) ,VALUE,color=Treatment,fill=Treatment,))+
 scale_x_date(date_labels = "%b %d",date_breaks = "1 day")+
 scale_fill_manual(values = c("#e31a1c","#ff7f00","#cab2d6","#33a02c"))  +
 #geom_rect(aes(xmin = as.Date("2025-04-10 10:00:00"), xmax = as.Date("2025-04-10 14:00:00"),ymin = -Inf, ymax = Inf),fill="#fcbba1",color="#fcbba1")+
