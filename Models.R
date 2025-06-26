@@ -1,4 +1,4 @@
-# Goal of this script is to use Before-After-Control-Impact models to determine duration of fire effects
+# Goal of this script is to use Before-After-Control-Impact models to determine duration of fire effects on water quality
 
 .libPaths()
 
@@ -29,6 +29,11 @@ Model_data_SRP <- LIMSP_Provisional_Data_Tidy_letters_log %>%
 filter(COLLECT_DATE<"2025-05-01 00:00:00") %>% 
 mutate(Phase=ifelse(COLLECT_DATE<"2025-04-10 00:00:00","Pre-burn","Post-Burn")) %>%
 filter( TEST_NAME=="SRP",Phase=="Post-Burn") 
+
+
+
+
+
 
 # Linear Model ------------------------------------------------------------
 
