@@ -33,7 +33,10 @@ mutate(Treatment=case_when(str_detect(STATION,"Untreated")~"Untreated",         
 mutate(Block=case_when(str_detect(STATION," A")~"A",                       #add treatment variable
                        str_detect(STATION," B")~"B",
                        str_detect(STATION,"C")~"C",
-                       TRUE ~ NA))
+                       TRUE ~ NA)) %>%
+mutate(Phase=ifelse(Date<"2025-04-10","Pre-Burn","Post-Burn")) %>%
+mutate(Phase=factor(Phase,c("Pre-Burn","Post-Burn")))  
+
 
 
 write_csv(Field_Readings_tidy ,"//ad.sfwmd.gov/dfsroot/userdata/mpowers/Desktop/Fire_Study/Data/Field Readings/Field_Readings_tidy.csv")
