@@ -28,8 +28,7 @@ Field_Readings_tidy <- read_csv("//ad.sfwmd.gov/dfsroot/userdata/mpowers/Desktop
 
 # Custom Theme ------------------------------------------------------------
 
-fire_theme <-list(scale_fill_manual(values = c("#e31a1c","#ff7f00","#cab2d6","#33a02c")),scale_color_manual(values = c("#e31a1c","#ff7f00","#cab2d6","#33a02c"))
-,theme_bw(base_size = 20),theme(legend.position="right",axis.text.x = element_text(angle = 45, vjust = 0.95, hjust=1)),xlab(""))
+fire_theme <-list(scale_fill_manual(values = c("#e31a1c","#ff7f00","#cab2d6","#33a02c","#e5d8bd","#fed9a6")),scale_color_manual(values = c("#e31a1c","#ff7f00","#cab2d6","#33a02c","#e5d8bd","#fed9a6")),theme_bw(base_size = 20),theme(legend.position="right",axis.text.x = element_text(angle = 45, vjust = 0.95, hjust=1)),xlab(""))
 
 # WQ_Summary ---Mean, SD, SE for each day and parameter---------------------------------------------------
 
@@ -158,6 +157,54 @@ geom_boxplot()+guides(colour = "none")+facet_wrap(~TEST_NAME,nrow = 1,scales="fr
 ylab("")+labs(title="")+fire_theme+theme(legend.position="bottom")
 
 ggsave(plot = last_plot(),filename="./Figures/Presentation figs/Field Readings Difference from daily mean.jpeg",width =16, height =9, units = "in")
+
+
+
+# Flow Figures ------------------------------------------------------------
+STA34_flow_DA_tidy 
+
+# Flow over time 
+ggplot(STA34_flow_DA_tidy ,aes(Date ,Flow,color=`Structure Location`,color=`Structure Location`))+
+geom_rect(aes(xmin =as.Date("2025-04-10") ,xmax=as.Date("2025-04-21"),ymin=-Inf,ymax=Inf),fill="#fb9a99",alpha=.5,color="grey20")+  
+geom_line(size=1.5)+
+scale_x_date(date_labels = "%b %d",date_breaks = "1 week")+coord_cartesian(xlim = as.Date(c("2025-01-01", "2025-06-29")),expand=F)+
+ylab(expression(Flow~(cfs)))+labs(title="")+fire_theme+scale_color_manual(values = c("#cab2d6","#33a02c"))+theme(legend.position="bottom")
+
+ggsave(plot = last_plot(),filename="./Figures/Presentation figs/Flow over time.jpeg",width =16, height =9, units = "in")
+
+
+
+# Depth Figures -----------------------------------------------------------
+
+#Water Depth from field readings
+ggplot(filter(Field_Readings_tidy, str_detect(TEST_NAME,"Water Depth")),aes(`Date Time`,VALUE,color=Treatment,fill=Treatment))+
+geom_point()+
+scale_x_datetime(date_labels = "%b %d",date_breaks = "1 month")+coord_cartesian(xlim = as.POSIXct(c("2025-01-01", "2025-06-29")))+
+ylab(expression(Water~Depth~(cm)))+labs(title="")+fire_theme+theme(legend.position="bottom")
+
+#Depth to consolidated substrate (DCS) from field readings
+ggplot(filter(Field_Readings_tidy, str_detect(TEST_NAME,"DCS")),aes(`Date Time`,VALUE,color=Treatment,fill=Treatment))+
+geom_point()+
+scale_x_datetime(date_labels = "%b %d",date_breaks = "1 month")+coord_cartesian(xlim = as.POSIXct(c("2025-01-01", "2025-06-29")))+
+ylab(expression(Water~Depth~(cm)))+labs(title="")+fire_theme+theme(legend.position="bottom")
+
+#Depth calculated from stage gauge
+ggplot(STA34_depth_tidy,aes(`Date Time`,`Depth to Consolidated Substrate (calculated)`,color=`Gauge`))+
+geom_line(size=1.5)+
+scale_x_datetime(date_labels = "%b %d",date_breaks = "1 week")+coord_cartesian(xlim = as.POSIXct(c("2025-01-01", "2025-06-29")))+
+ylab("Water Depth Calculated (cm)")+labs(title="")+fire_theme+scale_color_manual(values = c("#cab2d6","#33a02c"))+theme(legend.position="bottom")
+
+#Depth calculated from stage gauge and field readings
+ggplot(STA34_depth_tidy,aes(`Date Time`,`Depth to Consolidated Substrate (calculated)`,color=`Gauge`))+
+geom_rect(aes(xmin =as.POSIXct("2025-04-10") ,xmax=as.POSIXct("2025-04-21"),ymin=-Inf,ymax=Inf),fill="#fb9a99",alpha=.5,color="grey20")+  
+geom_line(size=1.5)+  
+geom_point(data=filter(Field_Readings_tidy, str_detect(TEST_NAME,"DCS")),aes(`Date Time`,VALUE,fill=Treatment),color="grey30",shape=21)+  
+scale_x_datetime(date_labels = "%b %d",date_breaks = "1 week")+coord_cartesian(xlim = as.POSIXct(c("2025-01-01", "2025-06-29")),expand=F)+
+ylab("Depth to Consolidated Substrate Calculated (cm)")+labs(title="")+fire_theme+
+scale_color_manual(values = c("#e5d8bd","#fed9a6"))+scale_fill_manual(values = c("#e31a1c","#ff7f00","#cab2d6","#33a02c"))+
+theme(legend.position="bottom")
+
+ggsave(plot = last_plot(),filename="./Figures/Presentation figs/Depth over time.jpeg",width =16, height =9, units = "in")
 
 
 # Test figs ---------------------------------------------------------------
