@@ -26,6 +26,9 @@ LIMSP_Provisional_Data_Tidy <- read_csv("//ad.sfwmd.gov/dfsroot/userdata/mpowers
 
 Field_Readings_tidy <- read_csv("//ad.sfwmd.gov/dfsroot/userdata/mpowers/Desktop/Fire_Study/Data/Field Readings/Field_Readings_tidy.csv")
 
+Sonde_Long_Tidy <- read_csv("//ad.sfwmd.gov/dfsroot/userdata/mpowers/Desktop/Fire_Study/Data/Sonde/Sonde_Long_Tidy.csv")
+
+
 # Custom Theme ------------------------------------------------------------
 
 fire_theme <-list(scale_fill_manual(values = c("#e31a1c","#ff7f00","#cab2d6","#33a02c","#e5d8bd","#fed9a6")),scale_color_manual(values = c("#e31a1c","#ff7f00","#cab2d6","#33a02c","#e5d8bd","#fed9a6")),theme_bw(base_size = 20),theme(legend.position="right",axis.text.x = element_text(angle = 45, vjust = 0.95, hjust=1)),xlab(""))
@@ -99,7 +102,13 @@ scale_x_date(date_labels = "%b %d",date_breaks = "1 day")+coord_cartesian(xlim =
 ylab(expression(P~Forms~(ug/L)))+fire_theme
 
 ggsave(plot = last_plot(),filename="./Figures/Presentation figs/P fractions closeup.jpeg",width =16, height =9, units = "in")
-  
+
+#stacked bar plot of P fractions  
+ggplot(filter(WQ_Summary ,TEST_NAME %in% c("PP","SRP","DOP"),`Date` >"2025-01-01",`Date` <"2025-05-01"),aes(as.factor(`Burn Day`) ,Mean*1000,fill=TEST_NAME))+
+geom_col(color="grey20")+facet_wrap(~Treatment,nrow = 1,strip.position="top")+
+ylab(expression(ug/L))+fire_theme+theme(legend.position="bottom")+xlab("Days from burn")+labs(fill="P Form") 
+
+ggsave(plot = last_plot(),filename="./Figures/Presentation figs/P fractions stacked columns closeup.jpeg",width =16, height =9, units = "in")
 
 #Nitrogen forms close_Up
 ggplot(filter(Post_burn_data_summary ,TEST_NAME %in% c("TN","NOX","NH4"),Date >"2025-04-09"),aes(Date ,Mean,ymin = (Mean - SE), ymax = (Mean + SE),color=Treatment,fill=Treatment))+
@@ -205,6 +214,23 @@ scale_color_manual(values = c("#e5d8bd","#fed9a6"))+scale_fill_manual(values = c
 theme(legend.position="bottom")
 
 ggsave(plot = last_plot(),filename="./Figures/Presentation figs/Depth over time.jpeg",width =16, height =9, units = "in")
+
+
+
+# Sonde Figures -----------------------------------------------------------
+
+
+Pre_post_fire_sonde <- Sonde_Long_Tidy %>%
+mutate(Phase=if_else(Date_time<"2025-04-10 12:00:00","Pre-burn","Post-burn")) %>%
+mutate(Phase=factor(Phase,c("Pre-burn","Post-burn")))
+
+
+#Temp °C
+ggplot(filter(Pre_post_fire_sonde,Parameter %in% c("Temp °C","ODO mg/L","SpCond µS/cm","pH","Chlorophyll RFU")),aes(hour(Date_time) ,Value,color=`Site Name`,fill=`Site Name`))+
+#geom_point(shape=21,size=2,color="black",alpha=.9)+
+geom_smooth()+
+scale_x_continuous(limits = c(0,24),breaks=seq(0,24,4))+  
+facet_grid(Parameter~Phase,scales = "free_y")+fire_theme
 
 
 # Test figs ---------------------------------------------------------------
