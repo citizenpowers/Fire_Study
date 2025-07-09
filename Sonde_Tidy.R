@@ -116,22 +116,25 @@ mutate(across(2:19,as.numeric))  #convert columns to numeric class
 
 #Join Data Deployment 1
 Deployment_1 <- bind_rows(EXOdata_BURN_111924_010625_Tidy,EXOdata_BurnHerbicide_111924_010625_Tidy,EXOdata_Herbicide_111924_010625_Tidy,EXOdata_Untreated_111924_120724_Tidy) %>%
-filter(Date_time<"2024-12-17 09:00:00",Date_time>"2024-11-19 13:00:00") #deployment period
+filter(Date_time<"2024-12-17 09:00:00",Date_time>"2024-11-19 13:00:00") %>% #deployment period
+mutate(Deployment="Deployment 1")
 
 #Join Data Deployment 2
 Deployment_2 <- bind_rows(EXOdata_Herbicide_011525_042825_Tidy,EXOdata_BURN_011525_042825_Tidy,EXOdata_Untreated_011525_042825_Tidy,EXOdata_BurnHerbicide_011525_042825_Tidy) %>%
-filter(Date_time<"2025-04-21 09:00:00",Date_time>"2025-01-15 12:30:00") #deployment period
+filter(Date_time<"2025-04-21 09:00:00",Date_time>"2025-01-15 12:30:00") %>%#deployment period
+mutate(Deployment="Deployment 2")
 
 #Join Data Deployment 3
 Deployment_3 <- bind_rows(EXOdata_Herbicide_051425_070725_Tidy,EXOdata_BURN_051425_070725_Tidy,EXOdata_Untreated_051425_070725_Tidy,EXOdata_BurnHerbicide_051425_070725_Tidy) %>%
-filter(Date_time<"2025-07-01 10:00:00",Date_time>"2025-05-14 11:30:00") #deployment period
-
+filter(Date_time<"2025-07-01 10:00:00",Date_time>"2025-05-14 11:30:00") %>%#deployment period
+mutate(Deployment="Deployment 3")
 
 Sonde_Wide_Tidy <- bind_rows(Deployment_1,Deployment_2,Deployment_3)
 
 #Convert to long format
 Sonde_Long_Tidy <- Sonde_Wide_Tidy %>%
-pivot_longer(names_to="Parameter",values_to = "Value",2:19)
+pivot_longer(names_to="Parameter",values_to = "Value",2:19)  %>%
+filter(Parameter %in% c("Battery V","Cable Pwr V","Wiper Position volt","pH mV","nLF Cond µS/cm","ODO % CB","ODO % sat","Sal psu","TSS mg/L","TDS mg/L","Cond µS/cm","TAL PC RFU")==FALSE)
 
 #Save Data
 write_csv(Sonde_Long_Tidy,"./Data/Sonde/Sonde_Long_Tidy.csv")
