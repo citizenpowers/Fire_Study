@@ -26,8 +26,9 @@ LIMSP_Provisional_Data_Tidy <- read_csv("//ad.sfwmd.gov/dfsroot/userdata/mpowers
 
 Field_Readings_tidy <- read_csv("//ad.sfwmd.gov/dfsroot/userdata/mpowers/Desktop/Fire_Study/Data/Field Readings/Field_Readings_tidy.csv")
 
-Sonde_Long_Tidy <- read_csv("//ad.sfwmd.gov/dfsroot/userdata/mpowers/Desktop/Fire_Study/Data/Sonde/Sonde_Long_Tidy.csv")
+Sonde_Data_Qualified <- read_csv("//ad.sfwmd.gov/dfsroot/userdata/mpowers/Desktop/Fire_Study/Data/Sonde/Sonde Data Qualified.csv")
 
+Soils_tidy <- read_csv("//ad.sfwmd.gov/dfsroot/userdata/mpowers/Desktop/Fire_Study/Data/Soils/Soils_tidy.csv")
 
 # Custom Theme ------------------------------------------------------------
 
@@ -220,55 +221,60 @@ ggsave(plot = last_plot(),filename="./Figures/Presentation figs/Depth over time.
 # Sonde Figures -----------------------------------------------------------
 
 
-Pre_post_fire_sonde <- Sonde_Long_Tidy %>%
+Pre_post_fire_sonde <- Sonde_Data_Qualified %>%
 mutate(Phase=if_else(Date_time<"2025-04-10 12:00:00","Pre-burn","Post-burn")) %>%
 mutate(Phase=factor(Phase,c("Pre-burn","Post-burn")))
 
 
-#Temp °C
-ggplot(filter(Pre_post_fire_sonde,Parameter %in% c("Temp °C","ODO mg/L","SpCond µS/cm","pH","Chlorophyll RFU")),aes(hour(Date_time) ,Value,color=`Site Name`,fill=`Site Name`))+
+#Diel Trends for all parameters
+ggplot(filter(Pre_post_fire_sonde,Parameter %in% c("Temp °C","DO (mg/L)","SpCond (µS/cm)","pH","Chl (RFU)"),is.na(`Remark Code`)),aes(hour(Date_time) ,Value,color=`Site`,fill=`Site`))+
 #geom_point(shape=21,size=2,color="black",alpha=.9)+
 geom_smooth()+
 scale_x_continuous(limits = c(0,24),breaks=seq(0,24,4))+  
 facet_grid(Parameter~Phase,scales = "free_y")+fire_theme
 
+#time series for all parameters
+ggplot(filter(Pre_post_fire_sonde,Parameter %in% c("Temp °C","DO (mg/L)","SpCond (µS/cm)","pH","Chl (RFU)"),is.na(`Remark Code`)),aes(Date_time ,Value,color=`Site`,fill=`Site`))+
+geom_point(shape=21,size=2,color="black",alpha=.9)+scale_x_datetime(date_labels = "%b %d",date_breaks = "1 month")+
+facet_wrap(~Parameter,scales = "free_y",nrow=5)+fire_theme
 
-# Test figs ---------------------------------------------------------------
+#time series for all parameters close-up of burn period
+ggplot(filter(Pre_post_fire_sonde,Parameter %in% c("Temp °C","DO (mg/L)","SpCond (µS/cm)","pH","Chl (RFU)"),is.na(`Remark Code`)),aes(Date_time ,Value,color=`Site`,fill=`Site`))+
+geom_point(shape=21,size=2,color="black",alpha=.5)+
+scale_x_datetime(date_labels = "%b %d",date_breaks = "1 month")+
+coord_cartesian(xlim = as.POSIXct(c("2025-03-15", "2025-05-25")))+  
+facet_wrap(~Parameter,scales = "free_y",nrow=5)+fire_theme
+
+#time series for all parameters close-up of burn period for temp DO and pH
+ggplot(filter(Pre_post_fire_sonde,Parameter %in% c("Temp °C","DO (mg/L)","pH"),Date_time>as.POSIXct("2025-04-01"),Date_time<as.POSIXct("2025-05-01")),aes(Date_time ,Value,color=`Site`,fill=`Site`))+
+geom_rect(aes(xmin =as.POSIXct("2025-04-10") ,xmax=as.POSIXct("2025-04-21"),ymin=-Inf,ymax=Inf),fill="#fb9a99",alpha=.5,color="grey20")+  
+geom_point(shape=21,size=2,color="black",alpha=.5)+
+scale_x_datetime(date_labels = "%b %d",date_breaks = "1 month")+
+coord_cartesian(xlim = as.POSIXct(c("2025-04-01", "2025-04-25")))+  
+facet_wrap(~Parameter,scales = "free_y",nrow=5)+fire_theme
+
+#time series for preburn period with all 4 sondes working close-up of burn period for temp DO and pH
+ggplot(filter(Pre_post_fire_sonde,Parameter %in% c("Temp °C","DO (mg/L)","pH"),Date_time>as.POSIXct("2025-03-01"),Date_time<as.POSIXct("2025-03-20")),aes(Date_time ,Value,color=`Site`,fill=`Site`))+
+geom_point(shape=21,size=2,alpha=.5)+
+scale_x_datetime(date_labels = "%b %d",date_breaks = "1 month")+
+coord_cartesian(xlim = as.POSIXct(c("2025-03-07", "2025-03-14")))+  
+facet_wrap(~Parameter,scales = "free_y",nrow=5)+fire_theme
+
+#time series for postburn period with all 4 sondes working close-up of burn period for temp DO and pH
+ggplot(filter(Pre_post_fire_sonde,Parameter %in% c("Temp °C","DO (mg/L)","pH"),Date_time>as.POSIXct("2025-05-01"),Date_time<as.POSIXct("2026-06-20"),if_else(Site=="Herbicide"& Parameter=="pH",F,T)),aes(Date_time ,Value,color=`Site`,fill=`Site`))+
+geom_point(shape=21,size=2,alpha=.5)+
+scale_x_datetime(date_labels = "%b %d",date_breaks = "1 week")+
+coord_cartesian(xlim = as.POSIXct(c("2025-05-16", "2025-05-30")))+  
+facet_wrap(~Parameter,scales = "free_y",nrow=5)+fire_theme
 
 
 
-LIMSP_Provisional_WQ <-LIMSP_Provisional_Data_Tidy %>%
-mutate(Date=as.Date(COLLECT_DATE),`Source`="Fire Study") %>%
-filter(TEST_NAME=="TPO4",Date >"2025-04-09",MATRIX=="SW",COLLECT_METHOD=="GP")  %>%
-select(Date,`STATION`,VALUE) %>%
-  pivot_wider(names_from="STATION",values_from = VALUE) 
 
+# Soils Figures --------------------------------------------------------------
+#time series for postburn period with all 4 sondes working close-up of burn period for temp DO and pH
+ggplot(filter(Soils_tidy,TEST_NAME %in% c("TCA-SOL","TP-SOL","TN-SOL","TC-SOL")),aes(MATRIX ,VALUE,fill=`Phase`))+
+geom_boxplot(color="grey20")+#geom_point(shape=21,size=2,alpha=.5,color="grey20")+
+facet_grid(TEST_NAME~STATION,scales="free_y")+fire_theme
 
-STA34_Compliance_tidy <- STA34_compliance_provisional %>%
-mutate(Date=as.Date(ymd_hms(COLLECT_DATE))) %>% 
-select(Date,`STATION`,`COLLECT_METHOD`,VALUE) %>%
-pivot_wider(names_from=c("COLLECT_METHOD","STATION"),values_from = VALUE) 
-
-All_data_tidy <- STA34_flow_DA_tidy %>%
-select(Date) %>%  
-distinct() %>%  
-left_join(STA34_Compliance_tidy,by="Date") %>%
-left_join(LIMSP_Provisional_WQ,by="Date")  %>%
-pivot_longer(names_to = "Station",values_to="Value",2:17)  %>%
-mutate(`Source`=if_else(str_detect(Station,"G38"),"Compliance","Fire Study"))  
-
-
-#flow and WQ post-burn
-ggplot(filter(STA34_flow_DA_tidy,Date >"2025-04-09"),aes(Date,`Flow`,color=`Structure Location`))+  
-geom_rect(aes(xmin =as.Date("2025-04-09") ,xmax=as.Date("2025-04-11"),ymin=-Inf,ymax=Inf),fill="#fb9a99",alpha=.5,color="grey80")+   
-geom_line(size=2)+
-geom_point(data=filter(All_data_tidy,Date >"2025-04-09"),aes(Date,Value*1000,fill=Source),inherit.aes = F,color="black",shape=21,size=2.5,alpha=.8)+
-scale_x_date(date_labels = "%b %d",date_breaks = "2 weeks")+
-scale_y_continuous(expression(TPO4~(ug/L)), sec.axis = sec_axis(~ . * 1, name = "Flow (cfs)")) + 
-scale_fill_manual(values = c("#e31a1c","#33a02c"))+scale_color_manual(values = c("#cab2d6","#91bfdb"))+
-theme_bw(base_size = 20)+theme(legend.position="bottom",axis.text.x = element_text(angle = 45, vjust = 0.95, hjust=1)) + 
-labs(title="")
-
-ggsave(plot = last_plot(),filename="./Figures/Compliance and Fires Study data.jpeg",width =16, height =9, units = "in")
 
 
